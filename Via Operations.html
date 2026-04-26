@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Vía Operations — Transport ops MVP</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; font-family: 'Inter', system-ui, sans-serif; }
+  #root { height: 100%; }
+  /* Make sure design-canvas artboards always render their app at full size */
+  .vo-artboard-wrap { width: 100%; height: 100%; overflow: hidden; }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script src="data.js"></script>
+<script type="text/babel" src="components.jsx"></script>
+<script type="text/babel" src="dashboard.jsx"></script>
+<script type="text/babel" src="dashboard-dense.jsx"></script>
+<script type="text/babel" src="screens.jsx"></script>
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "theme": "light",
+  "density": "dense",
+  "lang": "es",
+  "primaryAccent": "#3756d8"
+}/*EDITMODE-END*/;
+
+// Wrap each app in a container that applies global theme + density + accent.
+function ArtboardFrame({ children, t }) {
+  return (
+    <div
+      className="vo-artboard-wrap"
+      data-theme={t.theme}
+      data-density={t.density}
+      style={{ '--accent': t.primaryAccent }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const lang = t.lang;
+
+  return (
+    <>
+      <DesignCanvas>
+        <DCSection
+          id="overview"
+          title="Vía Operations · MVP Fase 1"
+          subtitle="Herramienta de operaciones diarias para empresa de transporte discrecional · 7 pantallas, 2 direcciones del dashboard, ~15 servicios de ejemplo"
+        >
+          <DCArtboard id="dash-modern" label="01 · Dashboard — Moderno B2B (Linear-ish)" width={1440} height={900}>
+            <ArtboardFrame t={t}><VODashboard lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="dash-dense" label="02 · Dashboard — Centralita densa" width={1440} height={900}>
+            <ArtboardFrame t={t}><VODashboardDense lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCSection
+          id="flows"
+          title="Pantallas clave del flujo operativo"
+          subtitle="Listado, planning, detalle, mapa y creación. La dirección base es la moderna B2B; la densa se aplica vía toggle."
+        >
+          <DCArtboard id="list" label="03 · Listado de servicios — tabla densa con filtros y bulk" width={1440} height={900}>
+            <ArtboardFrame t={t}><VOServicesList lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="calendar" label="04 · Planning — timeline tipo Gantt por conductor con línea NOW" width={1440} height={900}>
+            <ArtboardFrame t={t}><VOCalendar lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="detail" label="05 · Detalle de servicio — caso S-2844 (en cadena de retrasos)" width={1440} height={900}>
+            <ArtboardFrame t={t}><VOServiceDetail lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="map" label="06 · Mapa operativo — pins de servicios activos + tarjeta flotante" width={1440} height={900}>
+            <ArtboardFrame t={t}><VOMap lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+
+          <DCArtboard id="new" label="07 · Crear servicio — modal con asignación rápida sugerida" width={1440} height={900}>
+            <ArtboardFrame t={t}><VONewService lang={lang} /></ArtboardFrame>
+          </DCArtboard>
+        </DCSection>
+
+        <DCPostIt left={20} top={120} width={260}>
+          <b>Sistema de diseño</b>{'\n'}
+          • Inter (UI) + JetBrains Mono (datos){'\n'}
+          • Neutros fríos · acentos OKLCH{'\n'}
+          • Estado: verde / ámbar / rojo / azul / violeta (sin asignar){'\n'}
+          • Densidad media (toggle a densa){'\n'}
+          • Hairline borders, radios 6–8px
+        </DCPostIt>
+
+        <DCPostIt left={20} top={420} width={260}>
+          <b>Caso estrella</b>{'\n'}
+          La cadena de retrasos S-2844 → S-2851 está sembrada en los datos. Mírala en el dashboard, en el detalle, en el listado (fila ámbar) y en el mapa (ruta marcada).
+        </DCPostIt>
+
+        <DCPostIt left={20} top={680} width={260}>
+          <b>Tweaks</b>{'\n'}
+          Activa el toggle del toolbar para cambiar tema, densidad e idioma (ES/EN). Los cambios se aplican a todos los artboards a la vez.
+        </DCPostIt>
+      </DesignCanvas>
+
+      <TweaksPanel>
+        <TweakSection label="Apariencia" />
+        <TweakRadio
+          label="Tema"
+          value={t.theme}
+          options={['light', 'dark']}
+          onChange={(v) => setTweak('theme', v)}
+        />
+        <TweakRadio
+          label="Densidad"
+          value={t.density}
+          options={['regular', 'compact', 'dense']}
+          onChange={(v) => setTweak('density', v)}
+        />
+        <TweakSection label="Idioma" />
+        <TweakRadio
+          label="Copy"
+          value={t.lang}
+          options={['es', 'en']}
+          onChange={(v) => setTweak('lang', v)}
+        />
+        <TweakSection label="Marca" />
+        <TweakColor
+          label="Color de acento"
+          value={t.primaryAccent}
+          onChange={(v) => setTweak('primaryAccent', v)}
+        />
+      </TweaksPanel>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+
+</body>
+</html>
